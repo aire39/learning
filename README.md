@@ -1,0 +1,1 @@
+compile with -std=c++11 as I wrote the code with this compiler option set
