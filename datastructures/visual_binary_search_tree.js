@@ -47,6 +47,131 @@ var insertInput = document.getElementById('node_insert');
 //END User HTML Elements//
 //////////////////////////
 
+var removeNode = function(source_node)
+{
+	var left_node   = source_node.leftChild;
+	var right_node  = source_node.rightChild;
+	var parent_node = source_node.parent;
+	var leaf_node   = null;
+
+
+	if(source_node.parent == null)
+	{
+		//removing root
+		var lleaf_node = source_node.leftChild;
+		var rleaf_node = source_node.rightChild;
+
+		rleaf_node.parent = null;
+		source_node.rightChild = null;
+		
+		var leaf_node  = source_node.leftChild;
+		while(leaf_node.rightChild != null)
+			leaf_node = leaf_node.rightChild;
+
+		leaf_node.rightChild = rleaf_node;
+		rleaf_node.parent = leaf_node;
+
+		lleaf_node.parent = null;
+		lleaf_node.x = source_node.x;
+		lleaf_node.y = source_node.y;
+
+		return lleaf_node;
+		
+	}
+	else if(source_node.value > source_node.parent.value)
+	{
+		// On right-hand of tree
+		leaf_node = left_node;
+		if(leaf_node == null)
+			leaf_node = right_node;
+
+		while(left_node != null)
+		{
+				if(leaf_node.leftChild != null && right_node.value < leaf_node.value)
+					leaf_node = leaf_node.leftChild;
+				else if(leaf_node.rightChild != null && right_node.value > leaf_node.value)
+					leaf_node = leaf_node.rightChild;
+				else
+					break;
+		}
+
+		if(left_node != null)
+		{
+			if(right_node.value < leaf_node.value)
+				leaf_node.leftChild = right_node;
+			else if (right_node.value > leaf_node.value)
+				leaf_node.rightChild = right_node;
+			right_node.parent = leaf_node;	
+		}
+		
+		if(left_node != null)
+		{
+			if(parent_node.leftChild === source_node)
+				parent_node.leftChild = left_node;
+			else
+				parent_node.rightChild = left_node;
+			left_node.parent = parent_node;
+		}
+		else
+		{
+			if(parent_node.leftChild === source_node)
+				parent_node.leftChild = leaf_node;
+			else
+				parent_node.rightChild = leaf_node;
+			leaf_node.parent = parent_node;
+		}
+	}
+	else if(source_node.value < source_node.parent.value)
+	{
+		// On left-hand of tree
+		leaf_node = right_node;
+		if(leaf_node == null)
+			leaf_node = left_node;
+
+		while(right_node != null)
+		{
+				if(leaf_node.leftChild != null && left_node.value < leaf_node.value)
+					leaf_node = leaf_node.leftChild;
+				else if(leaf_node.rightChild != null && right_node.value > leaf_node.value)
+					leaf_node = leaf_node.rightChild;
+				else
+					break;
+		}
+
+		if(right_node != null)
+		{
+			if(left_node.value < leaf_node.value)
+				leaf_node.leftChild = left_node;
+			else if (left_node.value > leaf_node.value)
+				leaf_node.rightChild = left_node;
+			left_node.parent = leaf_node;	
+			source_node.leftChild = null;
+		}
+
+		if(right_node != null)
+		{
+			if(parent_node.leftChild === source_node)
+				parent_node.leftChild = right_node;
+			else
+				parent_node.rightChild = right_node;
+			right_node.parent = parent_node;
+			source_node.rightChild = null;
+			source_node.parent = null;
+		}
+		else
+		{
+			if(parent_node.leftChild === source_node)
+				parent_node.leftChild = leaf_node;
+			else
+				parent_node.rightChild = leaf_node;
+			leaf_node.parent = parent_node;
+		}
+
+	}
+	
+	delete source_node;
+
+}
 
 var insertNode = function(source_node, value)
 {
@@ -58,8 +183,6 @@ var insertNode = function(source_node, value)
 		new_node.x = canvas_width/2.0;
 		new_node.y = 100.0;
 		new_node.value = value;
-		new_node.selected = true;
-		selected_node = new_node;
 		return new_node;
 	}
 	else
@@ -305,11 +428,21 @@ var addnode = function(event)
 	{
 		root = insertNode(root, insertInput.value);
 	}
-	else if(selected_node != null && selected_node.selected == true)
+	else
 	{
-
-		insertNode(selected_node, parseInt(insertInput.value));
+		insertNode(root, parseInt(insertInput.value));
 		insertInput.value = '';
+	}
+}
+
+var deletenode = function(event)
+{
+	if(selected_node != null && selected_node.selected == true)
+	{
+		if(selected_node.parent === null)
+			root = removeNode(selected_node);
+		else
+			removeNode(selected_node);
 	}
 }
 
