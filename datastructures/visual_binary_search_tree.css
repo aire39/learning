@@ -110,3 +110,11 @@ span.icon img
 	display: inline;
 	vertical-align: middle;
 }
+
+.deactive, .deactive:hover
+{
+	background-color: gray !important;
+	cursor: default !important;
+	border: none !important;
+	color: black !important;
+}

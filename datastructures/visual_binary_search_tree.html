@@ -14,6 +14,7 @@
 			<div id="frame">
 				<p>Options</p>
 				<span class="icon"><img src="mouse.png" /> <strong style='color: #FF0'>Nodes</strong> can be <strong style='color: #FF0'>hovered</strong> and <strong style='color: #FF0'>clicked</strong> on.</span>
+				<span class="icon"><img src="mouse.png" /> View [(hold) middle + drag mouse].</span>
 				<div class="commands">
 					<p>Insert Node Value</p>
 					<input  id="node_insert" type="number" id="node_value" placeholder="Enter number values" />
@@ -24,11 +25,16 @@
 					<p>Remove Selected Node</p>
 					<button id="node_remove" onclick='deletenode(event)'>Remove</button>
 				</div>
+
+				<div class="commands">
+					<p>Perform Balancing</p>
+					<button id="tree_balance" class="deactive" onclick=''>Balance</button>
+				</div>
 			</div>
 		</div>
 
 		<div id="stage">
-			<canvas id="canvas" width="800" height="600" onmousemove="mousemove(event)" onclick="clicking(event)"></canvas>
+			<canvas id="canvas" width="800" height="600" onmouseup="mouseup(event)" onmousedown="mousedown(event)" onmousemove="mousemove(event)" onclick="clicking(event)"></canvas>
 		</div>
 
 		<script type="text/javascript" src="visual_binary_search_tree.js"></script>

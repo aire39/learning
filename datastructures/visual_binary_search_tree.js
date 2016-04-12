@@ -10,6 +10,12 @@ ctx.textAlign = "center";
 
 var timing = 0.0;
 
+var globalPosition = function()
+{
+	this.x = 0.5;
+	this.y = 0.5;
+}
+GlobalPosition = new globalPosition;
 ///////////////////////
 //Node Data Structure//
 
@@ -426,11 +432,11 @@ var addnode = function(event)
 {
 	if(root == null)
 	{
-		root = insertNode(root, insertInput.value);
+		root = insertNode(root, parseInt(insertInput.value));
 	}
 	else
 	{
-		insertNode(root, parseInt(insertInput.value));
+		insertNode(root, insertInput.value);
 		insertInput.value = '';
 	}
 }
@@ -446,6 +452,7 @@ var deletenode = function(event)
 	}
 }
 
+var MouseDown = null;
 var mousemove = function(event)
 {
 	var mousePosition = getCanvasMouseCoordinates(canvas, event);
@@ -455,6 +462,34 @@ var mousemove = function(event)
 		canvas.style.cursor = 'pointer';
 	else
 		canvas.style.cursor = 'default';
+
+	if(MouseDown != null && root != null)
+	{
+		var oDragPosition = { x: parseInt(MouseDown.x)-parseInt(mousePosition.x) + canvas_width/2.0, y: parseInt(MouseDown.y)-parseInt(mousePosition.y) + 100.0};
+		root.x = oDragPosition.x;
+		root.y = oDragPosition.y;
+	}
+
+}
+
+var mousedown = function(event)
+{
+	if(event.button === 1)
+	{
+		MouseDown = getCanvasMouseCoordinates(canvas, event);
+		//GlobalPosition.x = mousePosition.x+0.5;
+		//GlobalPosition.y = mousePosition.y+0.5;
+	}
+}
+
+var mouseup = function(event)
+{
+	if(event.button === 1)
+	{
+		MouseDown = null;
+		//GlobalPosition.x = mousePosition.x+0.5;
+		//GlobalPosition.y = mousePosition.y+0.5;
+	}
 }
 
 //End Event Handling//
