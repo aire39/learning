@@ -10,6 +10,9 @@ ctx.textAlign = "center";
 
 var timing = 0.0;
 
+///////////////////////
+//Node Data Structure//
+
 var node_depth    = 100.0;
 var node_radius   = 32;
 var selected_node = null;
@@ -25,65 +28,64 @@ var Node = function () {
 	this.selected = false;
 }
 
-////////////////////
-// Start Test Data//
+//END Node Data Structure//
+///////////////////////////
 
-var node0 = new Node();
-var node1 = new Node();
-var node2 = new Node();
-var node3 = new Node();
+/////////////
+//Root Node//
 
-node0.x = canvas_width/2.0;
-node0.y = 100.0;
+var root = null;
 
-node0.value = 50;
-node0.parent = null;
-node0.leftChild  = node1;
-node0.rightChild = node2;
+//END Root Node//
+/////////////////
 
-node1.value  = 20;
-node1.parent = node0;
-node1.leftChild  = null;
-node1.rightChild = null;
-
-node2.value  = 80;
-node2.parent = node0;
-node2.leftChild  = node3;
-node2.rightChild = null;
-
-node3.value  = 60;
-node3.parent = node2;
-node3.leftChild  = null;
-node3.rightChild = null;
-
-// END Test Data//
-//////////////////
-
-//////////////////
-//////////////////
+//////////////////////
+//User HTML Elements//
 
 var insertInput = document.getElementById('node_insert');
 
-//////////////////
-//////////////////
+//END User HTML Elements//
+//////////////////////////
+
 
 var insertNode = function(source_node, value)
 {
-	new_node = new Node();
-	new_node.value = value;
+	var new_node = null;
 
-	var source_child_left = source_node.leftChild;
-	var source_child_right = source_node.rightChild;
+	if(source_node === null)
+	{
+		new_node = new Node();
+		new_node.x = canvas_width/2.0;
+		new_node.y = 100.0;
+		new_node.value = value;
+		new_node.selected = true;
+		selected_node = new_node;
+		return new_node;
+	}
+	else
+	{
+		while(source_node != null)
+		{
+			if(source_node.leftChild != null && value < source_node.value)
+				source_node = source_node.leftChild;
+			else if(source_node.rightChild != null && value > source_node.value)
+				source_node = source_node.rightChild;
+			else
+				break;
+		}
 
-	new_node.parent = source_node;
-	new_node.leftChild = source_child_left;
-	new_node.rightChild = source_child_right;
+		new_node        = new Node();
+		new_node.value  = value;
+		new_node.parent = source_node;
 
-	source_child_left.parent  = new_node;
-	source_child_right.parent = new_node;
+		if(value < source_node.value)
+			source_node.leftChild = new_node;
+		else if (value > source_node.value)
+			source_node.rightChild = new_node;
 
-	source_node.leftChild  = new_node;
-	source_node.rightChild = null;
+		return new_node;
+
+	}
 }
 
 var getCanvasMouseCoordinates = function(cvs, evt)
@@ -179,7 +181,11 @@ var renderTree = function(root, depth, dir)
 	// dir is used as a multiplier to know if a node is the left or right child of a parent node
 	//
 
+	if(root == null)
+		return 0;
+
 	var node = root;
+	var node_parent = node.parent;
 
 	if(node == null)
 		return null;
@@ -242,8 +248,11 @@ var renderCircle = function(node)
 	ctx.stroke();
 
 	// Draw Node Value
-	ctx.fillStyle   = "rgb(255,255,255)";
-	ctx.fillText(node.value.toString(), node.x+0.05,node.y+canvas.getBoundingClientRect().top+0.05);
+	if(node.value != null)
+	{
+		ctx.fillStyle   = "rgb(255,255,255)";
+		ctx.fillText(node.value.toString(), node.x+0.05,node.y+canvas.getBoundingClientRect().top+0.05);
+	}
 }
 
 var renderConnectedLine = function(node0, node1)
@@ -261,8 +270,8 @@ var renderConnectedLine = function(node0, node1)
 	ydir /= mag;
 
 	// Get points along normal/direction to get the edge intersection points of node0 and node1
-	pnt1_x = node0.x + xdir * node_radius;
-	pnt1_y = node0.y + ydir * node_radius;
+	pnt1_x = node0.x +  xdir * node_radius;
+	pnt1_y = node0.y +  ydir * node_radius;
 	pnt2_x = node1.x + -xdir * node_radius;
 	pnt2_y = node1.y + -ydir * node_radius;
 
@@ -287,14 +296,19 @@ var renderConnectedLine = function(node0, node1)
 var clicking = function(event)
 {
 	var mousePosition = getCanvasMouseCoordinates(canvas, event);
-	checkForSelection(node0, mousePosition.x, mousePosition.y);
+	checkForSelection(root, mousePosition.x, mousePosition.y);
 }
 
 var addnode = function(event)
 {
-	if(selected_node != null && selected_node.selected == true)
+	if(root == null)
 	{
-		insertNode(selected_node, insertInput.value);
+		root = insertNode(root, insertInput.value);
+	}
+	else if(selected_node != null && selected_node.selected == true)
+	{
+
+		insertNode(selected_node, parseInt(insertInput.value));
 		insertInput.value = '';
 	}
 }
@@ -302,7 +316,7 @@ var addnode = function(event)
 var mousemove = function(event)
 {
 	var mousePosition = getCanvasMouseCoordinates(canvas, event);
-	checkForSelectionOnHover(node0, mousePosition.x, mousePosition.y);
+	checkForSelectionOnHover(root, mousePosition.x, mousePosition.y);
 
 	if(node_hovered == true)
 		canvas.style.cursor = 'pointer';
@@ -313,15 +327,24 @@ var mousemove = function(event)
 //End Event Handling//
 //////////////////////
 
+//////////////
+//Render BST//
+
+function update(time)
+{
+	if(root != null)
+		root.y = 100 + 5*Math.sin(time/500);
+}
+
 var animationStartTime = window.performance.now();
 function draw(duration)
 {
-	var m_time = duration - animationStartTime;
-	window.requestAnimationFrame(draw); // commented out for now since no real animation is actually available.
-	ctx.clearRect(0,0,canvas_width,canvas_height); // clear canvas
+	window.requestAnimationFrame(draw);
+	ctx.clearRect(0,0,canvas_width,canvas_height);
+	timing = duration - animationStartTime;
 
-	node0.y = 100 + 5*Math.sin(m_time/500);
-	renderTree(node0, 0, 0);                       // render tree
+	update(timing);
+	renderTree(root, 0, 0);                       // render tree
 
 	 
 }

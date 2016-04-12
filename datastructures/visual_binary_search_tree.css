@@ -7,6 +7,12 @@ p, span
 	cursor: default;
 }
 
+#panel_title
+{
+	text-align: center;
+	font-weight: bold;
+}
+
 #option_panel
 {
 	position: fixed;

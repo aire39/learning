@@ -9,11 +9,11 @@
 		
 		<div id="option_panel">
 
-			<p style="text-align: center; font-weight: bold">Binary Search Tree (AVL)</p>
+			<p id="panel_title">Binary Search Tree (AVL)</p>
 
 			<div id="frame">
 				<p>Options</p>
-				<span class="icon"><img src="mouse.png" /> Node can be hovered and clicked on.</span>
+				<span class="icon"><img src="mouse.png" /> <strong style='color: #FF0'>Nodes</strong> can be <strong style='color: #FF0'>hovered</strong> and <strong style='color: #FF0'>clicked</strong> on.</span>
 				<div class="commands">
 					<p>Insert Node Value</p>
 					<input  id="node_insert" type="number" id="node_value" placeholder="Enter number values" />
@@ -30,7 +30,9 @@
 		<div id="stage">
 			<canvas id="canvas" width="640" height="480" onmousemove="mousemove(event)" onclick="clicking(event)"></canvas>
 		</div>
+
+		<script type="text/javascript" src="visual_binary_search_tree.js"></script>
+
 	</body>
 
-	<script type="text/javascript" src="visual_binary_search_tree.js"></script>
 </html>
