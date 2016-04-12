@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<title>Visual Binary Search Tree</title>
+		<link rel="stylesheet" type="text/css" href="visual_binary_search_tree.css">
+	</head>
+
+	<body>
+		
+		<div id="option_panel">
+
+			<p style="text-align: center; font-weight: bold">Binary Search Tree (AVL)</p>
+
+			<div id="frame">
+				<p>Options</p>
+				<div class="commands">
+					<p>Insert Node Value</p>
+					<input  id="node_insert" type="number" id="node_value" placeholder="Enter number values" />
+					<button id="node_submit" onclick='addnode(event)'>Insert</button>
+				</div>
+
+				<div class="commands">
+					<p>Remove Selected Node</p>
+					<button id="node_submit" onclick='addnode(event)'>Erase</button>
+				</div>
+			</div>
+		</div>
+
+		<div id="stage">
+			<canvas id="canvas" width="640" height="480" onmousemove="mousemove(event)" onclick="clicking(event)"></canvas>
+		</div>
+	</body>
+
+	<script type="text/javascript" src="visual_binary_search_tree.js"></script>
+</html>
