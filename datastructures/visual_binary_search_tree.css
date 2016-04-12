@@ -90,3 +90,17 @@ p, span
 	border-bottom: 1px solid #AADF11;
 	color: white;
 }
+
+span.icon
+{
+	position: relative;
+	display: block;
+	font-size: 12px;
+}
+
+span.icon img
+{
+	position: relative;
+	display: inline;
+	vertical-align: middle;
+}
