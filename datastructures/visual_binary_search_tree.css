@@ -38,10 +38,17 @@ p, span
 	padding: 4px;
 }
 
-#canvas
+#stage
 {
 	position: absolute;
+	display: block;
 	left: 250px;
+}
+
+#stage canvas
+{
+	position: absolute;
+	display: block;
 }
 
 .commands *
@@ -95,6 +102,18 @@ p, span
 	border-right: 1px solid #AADF11;
 	border-bottom: 1px solid #AADF11;
 	color: white;
+}
+
+#clearAll
+{
+	background-color: #D22;
+	color: white;
+}
+
+#clearAll:hover
+{
+	border-right: 1px solid #F66;
+	border-bottom: 1px solid #F66;
 }
 
 span.icon
