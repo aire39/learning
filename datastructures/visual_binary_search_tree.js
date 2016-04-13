@@ -64,25 +64,39 @@ var removeNode = function(source_node)
 	if(source_node.parent == null)
 	{
 		//removing root
-		var lleaf_node = source_node.leftChild;
-		var rleaf_node = source_node.rightChild;
+		if(source_node.leftChild != null)
+		{
+			var lleaf_node = source_node.leftChild;
+			var rleaf_node = source_node.rightChild;
 
-		rleaf_node.parent = null;
-		source_node.rightChild = null;
-		
-		var leaf_node  = source_node.leftChild;
-		while(leaf_node.rightChild != null)
-			leaf_node = leaf_node.rightChild;
+			rleaf_node.parent      = null;
+			source_node.rightChild = null;
+			
+			var leaf_node  = source_node.leftChild;
+			while(leaf_node.rightChild != null)
+				leaf_node = leaf_node.rightChild;
 
-		leaf_node.rightChild = rleaf_node;
-		rleaf_node.parent = leaf_node;
+			leaf_node.rightChild = rleaf_node;
+			rleaf_node.parent = leaf_node;
 
-		lleaf_node.parent = null;
-		lleaf_node.x = source_node.x;
-		lleaf_node.y = source_node.y;
+			lleaf_node.parent = null;
+			lleaf_node.x = source_node.x;
+			lleaf_node.y = source_node.y;
 
-		return lleaf_node;
-		
+			return lleaf_node;
+		}
+		else
+		{
+			var rleaf_node = source_node.rightChild;
+			rleaf_node.parent = null
+			source_node.rightChild = null;
+
+			rleaf_node.x = source_node.x;
+			rleaf_node.y = source_node.y;
+
+			return rleaf_node;
+		}
+
 	}
 	else if(source_node.value > source_node.parent.value)
 	{
@@ -127,7 +141,7 @@ var removeNode = function(source_node)
 			leaf_node.parent = parent_node;
 		}
 	}
-	else if(source_node.value < source_node.parent.value)
+	else
 	{
 		// On left-hand of tree
 		leaf_node = right_node;
@@ -174,8 +188,6 @@ var removeNode = function(source_node)
 		}
 
 	}
-	
-	delete source_node;
 
 }
 
@@ -436,7 +448,7 @@ var addnode = function(event)
 	}
 	else
 	{
-		insertNode(root, insertInput.value);
+		insertNode(root, parseInt(insertInput.value));
 		insertInput.value = '';
 	}
 }
