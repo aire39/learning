@@ -37,6 +37,8 @@ var selected_node = null;
 var Node = function () {
 	this.x = 0;
 	this.y = 0;
+
+	this.balanceFactor = 0;
 	this.value = null;
 
 	this.leftChild  = null;
@@ -117,21 +119,27 @@ var traverseLevel = function(root)
 
 var findNode = function(node, value)
 {
-	if(node.value > value)
-		node = node.leftChild
-	else if(node.value < value)
-		node = node.rightChild;
-
-	if(node.value === value)
+	while(node !== null)
 	{
-		if(selected_node !== null)
-			selected_node.selected = false;
+		if(node.value === value)
+		{
+			if(selected_node !== null)
+				selected_node.selected = false;
 
-		node.selected = true;
-		selected_node = node;
+			node.selected = true;
+			selected_node = node;
 
-		console.log('Found!');
+			console.log('Found!');
+			return true;
+		}
+
+		if(node.value > value)
+			node = node.leftChild
+		else if(node.value < value)
+			node = node.rightChild;
 	}
+
+	return false;
 }
 
 var removeNode = function(source_node)
