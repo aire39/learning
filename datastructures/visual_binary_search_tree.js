@@ -117,6 +117,128 @@ var traverseLevel = function(root)
 	
 }
 
+var singleRotationLeft = function(node)
+{
+	var nodeA = node;
+	var nodeB = nodeA.rightChild;
+	var nodeC = nodeB.leftChild;
+
+	nodeA.rightChild = nodeC;
+	nodeB.leftChild  = nodeA;
+	
+	if(nodeC !== null)
+		nodeC.parent = nodeA;
+
+	nodeB.parent = nodeA.parent;
+	nodeA.parent = nodeB;
+
+	var Abf = nodeA.balanceFactor;
+	var Bbf = nodeB.balanceFactor;
+
+	if(Bbf <= 0)
+	{
+		if(Abf < 1)
+		{
+			nodeB.balanceFactor = Abf + Bbf - 1;
+		}
+		else
+		{
+			nodeB.balanceFactor = Bbf - 1;
+		}
+
+		nodeA.balanceFactor = Abf - 1;
+	}
+	else
+	{
+		if(Abf <= Bbf)
+		{
+			nodeB.balanceFactor = Abf - 2;
+		}
+		else
+		{
+			nodeB.balanceFactor = Bbf - 1;
+		}
+		nodeA.balanceFactor = Abf - Bbf - 1;
+	}
+
+	return nodeB;
+}
+
+var singleRotationRight = function(node)
+{
+	var nodeA = node;
+	var nodeB = nodeA.leftChild;
+	var nodeC = nodeB.rightChild;
+
+	nodeA.leftChild  = nodeC;
+	nodeB.rightChild = nodeA;
+	
+	if(nodeC !== null)
+		nodeC.parent = nodeA;
+
+	nodeB.parent = nodeA.parent;
+	nodeA.parent = nodeB;
+
+	var Abf = nodeA.balanceFactor;
+	var Bbf = nodeB.balanceFactor;
+
+	if(Bbf <= 0)
+	{
+		if(Abf < 1)
+		{
+			nodeB.balanceFactor = Abf + Bbf - 1;
+		}
+		else
+		{
+			nodeB.balanceFactor = Bbf - 1;
+		}
+
+		nodeA.balanceFactor = Abf - 1;
+	}
+	else
+	{
+		if(Abf <= Bbf)
+		{
+			nodeB.balanceFactor = Abf - 2;
+		}
+		else
+		{
+			nodeB.balanceFactor = Bbf - 1;
+		}
+		nodeA.balanceFactor = Abf - Bbf - 1;
+	}
+
+	return nodeB;
+}
+
+var nodeBalance = function(node)
+{
+	if(node.balanceFactor >= 0)
+	{
+		if(node.rightChild !== null && node.rightChild.balanceFactor >= 0)
+		{
+			return singleRotationLeft(node);
+		}
+		else
+		{
+			node.rightChild = singleRotationRight(node.rightChild);
+			return singleRotationLeft(node);
+		}
+	}
+	else
+	{
+		if(node.leftChild !== null && node.leftChild <= 0)
+		{
+			return singleRotationRight(node);
+		}
+		else
+		{
+			node.leftChild = singleRotationLeft(node.leftChild);
+			return singleRotationRight(node);
+		}
+	}
+}
+
 var findNode = function(node, value)
 {
 	while(node !== null)
@@ -193,7 +315,7 @@ var removeNode = function(source_node)
 		}
 
 	}
-	else if(source_node.value > source_node.parent.value)
+	else if(source_node.value >= source_node.parent.value)
 	{
 		// On right-hand of tree
 		leaf_node = left_node;
@@ -204,7 +326,7 @@ var removeNode = function(source_node)
 		{
 				if(leaf_node.leftChild !== null && right_node.value < leaf_node.value)
 					leaf_node = leaf_node.leftChild;
-				else if(leaf_node.rightChild !== null && right_node.value > leaf_node.value)
+				else if(leaf_node.rightChild !== null && right_node.value >= leaf_node.value)
 					leaf_node = leaf_node.rightChild;
 				else
 					break;
@@ -214,7 +336,7 @@ var removeNode = function(source_node)
 		{
 			if(right_node.value < leaf_node.value)
 				leaf_node.leftChild = right_node;
-			else if (right_node.value > leaf_node.value)
+			else if (right_node.value >= leaf_node.value)
 				leaf_node.rightChild = right_node;
 			right_node.parent = leaf_node;	
 		}
@@ -249,7 +371,7 @@ var removeNode = function(source_node)
 		{
 				if(leaf_node.leftChild !== null && left_node.value < leaf_node.value)
 					leaf_node = leaf_node.leftChild;
-				else if(leaf_node.rightChild !== null && right_node.value > leaf_node.value)
+				else if(leaf_node.rightChild !== null && right_node.value >= leaf_node.value)
 					leaf_node = leaf_node.rightChild;
 				else
 					break;
@@ -259,7 +381,7 @@ var removeNode = function(source_node)
 		{
 			if(left_node.value < leaf_node.value)
 				leaf_node.leftChild = left_node;
-			else if (left_node.value > leaf_node.value)
+			else if (left_node.value >= leaf_node.value)
 				leaf_node.rightChild = left_node;
 			left_node.parent = leaf_node;	
 			source_node.leftChild = null;
@@ -298,7 +420,7 @@ var insertNode = function(source_node, value)
 		new_node.x = canvas_width/2.0;
 		new_node.y = 100.0;
 		new_node.value = value;
-		return new_node;
+		treecount++;
 	}
 	else
 	{
@@ -306,7 +428,7 @@ var insertNode = function(source_node, value)
 		{
 			if(source_node.leftChild !== null && value < source_node.value)
 				source_node = source_node.leftChild;
-			else if(source_node.rightChild !== null && value > source_node.value)
+			else if(source_node.rightChild !== null && value >= source_node.value)
 				source_node = source_node.rightChild;
 			else
 				break;
@@ -318,12 +440,35 @@ var insertNode = function(source_node, value)
 
 		if(value < source_node.value)
 			source_node.leftChild = new_node;
-		else if (value > source_node.value)
+		else if (value >= source_node.value)
 			source_node.rightChild = new_node;
 
-		return new_node;
+		source_node = new_node;
 
+		var oldbf = 0;
+		while(source_node.parent !== null)
+		{
+			var child = source_node;
+			oldbf = source_node.balanceFactor;
+			source_node = source_node.parent;
+
+			if(source_node.rightChild === child && child !== null)
+			{
+				source_node.balanceFactor++;
+			}
+			else if(source_node.leftChild === child && child !== null)
+			{
+				source_node.balanceFactor--;
+			}
+
+
+			if(source_node.balanceFactor < -1 || source_node.balanceFactor > 1)
+				return nodeBalance(source_node);
+		}
+		
 	}
+
+	return new_node;
 }
 
 //END Binary Tree Functions//
@@ -512,6 +657,9 @@ var renderCircle = function(node, context)
 	{
 		context.fillStyle   = "rgb(255,255,255)";
 		context.fillText(node.value.toString(), node.x+0.05,node.y+canvas.getBoundingClientRect().top+0.05);
+
+		context.fillStyle   = "rgb(100,100,255)";
+		context.fillText(node.balanceFactor.toString(), node.x+0.05,node.y+canvas.getBoundingClientRect().top+0.05-20.0);
 	}
 }
 
@@ -540,6 +688,9 @@ var renderSquare = function(node, context)
 	{
 		context.fillStyle   = "rgb(255,255,255)";
 		context.fillText(node.value.toString(), node.x+0.05+32.0,node.y+canvas.getBoundingClientRect().top+0.05+32.0);
+
+		//context.fillStyle   = "rgb(0,0,255)";
+		//context.fillText(node.value.toString(), node.x+0.05+32.0,node.y+canvas.getBoundingClientRect().top+0.05+32.0-40.0);
 	}
 }
 
@@ -599,10 +750,17 @@ var addnode = function(event)
 		if(root == null)
 		{
 			root = insertNode(root, parseInt(insertInput.value));
-		}
+		}	
 		else
 		{
-			insertNode(root, parseInt(insertInput.value));
+			var n = insertNode(root, parseInt(insertInput.value));
+			if(n.parent === null)
+			{
+				n.x = root.x;
+				n.y = root.y;
+				root = n;
+			}
+
 			insertInput.value = '';
 		}
 
