@@ -186,26 +186,26 @@ var singleRotationRight = function(node)
 	{
 		if(Abf < 1)
 		{
-			nodeB.balanceFactor = Abf + Bbf - 1;
+			nodeB.balanceFactor = Bbf - Abf - 1;
 		}
 		else
 		{
-			nodeB.balanceFactor = Bbf - 1;
+			nodeB.balanceFactor = Abf + 1;
 		}
 
-		nodeA.balanceFactor = Abf - 1;
+		nodeA.balanceFactor = Abf - Bbf + 1;
 	}
 	else
 	{
-		if(Abf <= Bbf)
+		if(Abf >= Bbf)
 		{
-			nodeB.balanceFactor = Abf - 2;
+			nodeB.balanceFactor = Bbf + 1;
 		}
 		else
 		{
-			nodeB.balanceFactor = Bbf - 1;
+			nodeB.balanceFactor = Abf + 2;
 		}
-		nodeA.balanceFactor = Abf - Bbf - 1;
+		nodeA.balanceFactor = Bbf + 1;
 	}
 
 	return nodeB;
@@ -223,11 +223,12 @@ var nodeBalance = function(node)
 		{
 			node.rightChild = singleRotationRight(node.rightChild);
 			return singleRotationLeft(node);
+			//return singleRotationRight(node.rightChild)
 		}
 	}
 	else
 	{
-		if(node.leftChild !== null && node.leftChild <= 0)
+		if(node.leftChild !== null && node.leftChild.balanceFactor <= 0)
 		{
 			return singleRotationRight(node);
 		}
@@ -439,9 +440,15 @@ var insertNode = function(source_node, value)
 		new_node.parent = source_node;
 
 		if(value < source_node.value)
+		{
 			source_node.leftChild = new_node;
+			source_node.balanceFactor--;
+		}
 		else if (value >= source_node.value)
+		{
 			source_node.rightChild = new_node;
+			source_node.balanceFactor++;
+		}
 
 		source_node = new_node;
 
@@ -449,16 +456,18 @@ var insertNode = function(source_node, value)
 		while(source_node.parent !== null)
 		{
 			var child = source_node;
-			oldbf = source_node.balanceFactor;
 			source_node = source_node.parent;
+			oldbf = source_node.balanceFactor;
 
 			if(source_node.rightChild === child && child !== null)
 			{
-				source_node.balanceFactor++;
+				if(source_node.rightChild.balanceFactor !== 0)
+					source_node.balanceFactor++;
 			}
 			else if(source_node.leftChild === child && child !== null)
 			{
-				source_node.balanceFactor--;
+				if(source_node.leftChild.balanceFactor !== 0)
+					source_node.balanceFactor--;
 			}
 
 
