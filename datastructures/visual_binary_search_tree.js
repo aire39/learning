@@ -186,26 +186,26 @@ var singleRotationRight = function(node)
 	{
 		if(Abf < 1)
 		{
-			nodeB.balanceFactor = Bbf - Abf - 1;
+			nodeB.balanceFactor = Abf + 2;
 		}
 		else
 		{
-			nodeB.balanceFactor = Abf + 1;
+			nodeB.balanceFactor = Bbf + 1;
 		}
 
 		nodeA.balanceFactor = Abf - Bbf + 1;
 	}
 	else
 	{
-		if(Abf >= Bbf)
+		if(Abf <= Bbf)
 		{
-			nodeB.balanceFactor = Bbf + 1;
+			nodeB.balanceFactor = Abf + Bbf + 2;
 		}
 		else
 		{
-			nodeB.balanceFactor = Abf + 2;
+			nodeB.balanceFactor = Bbf + 1;
 		}
-		nodeA.balanceFactor = Bbf + 1;
+		nodeA.balanceFactor = Abf + 1;
 	}
 
 	return nodeB;
@@ -223,7 +223,6 @@ var nodeBalance = function(node)
 		{
 			node.rightChild = singleRotationRight(node.rightChild);
 			return singleRotationLeft(node);
-			//return singleRotationRight(node.rightChild)
 		}
 	}
 	else
@@ -246,17 +245,17 @@ var findNode = function(node, value)
 	{
 		if(node.value === value)
 		{
+			/// Set selected_node property selected(bool) to false if selected_node
+			/// exist.
 			if(selected_node !== null)
 				selected_node.selected = false;
 
 			node.selected = true;
 			selected_node = node;
-
-			console.log('Found!');
 			return true;
 		}
 
-		if(node.value > value)
+		if(node.value >= value)
 			node = node.leftChild
 		else if(node.value < value)
 			node = node.rightChild;
@@ -267,146 +266,196 @@ var findNode = function(node, value)
 
 var removeNode = function(source_node)
 {
-	var left_node   = source_node.leftChild;
-	var right_node  = source_node.rightChild;
-	var parent_node = source_node.parent;
-	var leaf_node   = null;
+	var current = source_node;
+	var B = 0;
 
-
-	if(source_node.parent == null)
+	if(source_node.leftChild === null && source_node.rightChild === null)
 	{
-		if(source_node.leftChild === null && source_node.rightChild === null)
-			return null;
+		/// If node is a leaf node
 
-		//removing root
-		if(source_node.leftChild !== null)
+		source_node = source_node.parent;
+		B = source_node.balanceFactor;
+
+		if(source_node.leftChild === current)
 		{
-			var lleaf_node = source_node.leftChild;
-			var rleaf_node = source_node.rightChild;
-
-			if(rleaf_node !== null)
-				rleaf_node.parent  = null;
-			source_node.rightChild = null;
-			
-			var leaf_node  = source_node.leftChild;
-			while(leaf_node.rightChild !== null)
-				leaf_node = leaf_node.rightChild;
-
-			leaf_node.rightChild = rleaf_node;
-
-			if(rleaf_node !== null)
-				rleaf_node.parent = leaf_node;
-
-			lleaf_node.parent = null;
-			lleaf_node.x = source_node.x;
-			lleaf_node.y = source_node.y;
-
-			return lleaf_node;
+			source_node.leftChild = null;
+			source_node.balanceFactor++;
 		}
 		else
 		{
-			var rleaf_node = source_node.rightChild;
-			rleaf_node.parent = null
 			source_node.rightChild = null;
-
-			rleaf_node.x = source_node.x;
-			rleaf_node.y = source_node.y;
-
-			return rleaf_node;
+			source_node.balanceFactor--;
 		}
 
+		current.parent = null;
+		delete current;
 	}
-	else if(source_node.value >= source_node.parent.value)
+	else if((source_node.leftChild === null && source_node.rightChild !== null) || (source_node.rightChild === null && source_node.leftChild !== null))
 	{
-		// On right-hand of tree
-		leaf_node = left_node;
-		if(leaf_node === null)
-			leaf_node = right_node;
+		/// If node has at 1 child node
 
-		while(left_node != null)
-		{
-				if(leaf_node.leftChild !== null && right_node.value < leaf_node.value)
-					leaf_node = leaf_node.leftChild;
-				else if(leaf_node.rightChild !== null && right_node.value >= leaf_node.value)
-					leaf_node = leaf_node.rightChild;
-				else
-					break;
-		}
+		source_node = source_node.parent;
+		B = source_node.balanceFactor;
 
-		if(left_node != null)
+		if(source_node.leftChild === current)
 		{
-			if(right_node.value < leaf_node.value)
-				leaf_node.leftChild = right_node;
-			else if (right_node.value >= leaf_node.value)
-				leaf_node.rightChild = right_node;
-			right_node.parent = leaf_node;	
-		}
-		
-		if(left_node != null)
-		{
-			if(parent_node.leftChild === source_node)
-				parent_node.leftChild = left_node;
+			if(current.rightChild !== null)
+			{
+				source_node.leftChild = current.rightChild;
+				current.rightChild.parent = source_node;
+			}
 			else
-				parent_node.rightChild = left_node;
-			left_node.parent = parent_node;
+			{
+				source_node.leftChild = current.leftChild;
+				current.leftChild.parent = source_node;
+			}
+
+			source_node.balanceFactor++;
 		}
 		else
 		{
-			if(parent_node.leftChild === source_node)
-				parent_node.leftChild = leaf_node;
+			if(current.rightChild !== null)
+			{
+				source_node.rightChild = current.rightChild;
+				current.rightChild.parent = source_node;
+			}
 			else
-				parent_node.rightChild = leaf_node;
+			{
+				source_node.rightChild = current.leftChild;
+				current.leftChild.parent = source_node;
+			}
 
-			if(leaf_node !== null)
-				leaf_node.parent = parent_node;
+			source_node.balanceFactor--;
+			
 		}
+
+		delete current;
 	}
 	else
 	{
-		// On left-hand of tree
-		leaf_node = right_node;
-		if(leaf_node == null)
-			leaf_node = left_node;
+		/// If node has both left and right child nodes
 
-		while(right_node != null)
-		{
-				if(leaf_node.leftChild !== null && left_node.value < leaf_node.value)
-					leaf_node = leaf_node.leftChild;
-				else if(leaf_node.rightChild !== null && right_node.value >= leaf_node.value)
-					leaf_node = leaf_node.rightChild;
-				else
-					break;
-		}
+		// Find minimal from right subtree
+		var p = current.parent;
+		var min_node = source_node.rightChild;
+		while(min_node.leftChild !== null)
+			min_node = min_node.leftChild;
 
-		if(right_node !== null)
-		{
-			if(left_node.value < leaf_node.value)
-				leaf_node.leftChild = left_node;
-			else if (left_node.value >= leaf_node.value)
-				leaf_node.rightChild = left_node;
-			left_node.parent = leaf_node;	
-			source_node.leftChild = null;
-		}
+		// replace source node
+		min_node.parent     = source_node.parent;
+		min_node.leftChild  = source_node.leftChild;
 
-		if(right_node !== null)
+		if(source_node.leftChild !== null)
+			source_node.leftChild.parent = min_node;
+
+		B = min_node.balanceFactor;
+
+		if(p !== null)
 		{
-			if(parent_node.leftChild === source_node)
-				parent_node.leftChild = right_node;
+			if(p.rightChild == current)
+			{
+				p.rightChild = min_node;
+				min_node.balanceFactor--;
+			}
 			else
-				parent_node.rightChild = right_node;
-			right_node.parent = parent_node;
-			source_node.rightChild = null;
+			{
+				p.leftChild = min_node;
+				min_node.balanceFactor++;
+			}
+		}
+
+		source_node = min_node;
+		current.parent = null;
+		current.leftChild = null;
+		current.rightChild = null;
+
+		delete current;
+
+	}
+
+	if(B !== 0)
+	{
+		if(source_node.parent === null && source_node.balanceFactor !== 0)
+		{
+			if(B > 0)
+				source_node.balanceFactor--;
+			else if(B < 0)
+				source_node.balanceFactor++;
+		}
+
+		while(source_node.parent !== null)
+		{
+			var p = source_node.parent;
+
+			if(p.rightChild === source_node)
+			{
+				source_node = source_node.parent;
+				source_node.balanceFactor--;
+			}
+			else
+			{
+				source_node = source_node.parent;
+				source_node.balanceFactor++;
+			}
+
+			if(source_node.parent !== null && (source_node.balanceFactor < -1 || source_node.balanceFactor > 1))
+			{
+				/// Need to know which link side the parent needs to attach itself
+				/// to the rebalanced node
+
+				if(source_node.parent.leftChild === source_node)
+					source_node.parent.leftChild = nodeBalance(source_node);
+				else
+					source_node.parent.rightChild = nodeBalance(source_node);
+			}
+			else if(source_node.balanceFactor < -1 || source_node.balanceFactor > 1)
+			{
+				source_node = nodeBalance(source_node);
+			}
+		}
+	}
+
+	while(source_node.parent !== null)
+		source_node = source_node.parent;
+
+	return source_node;
+
+}
+
+var removeNodeAVL = function(source_node)
+{
+	var left_node   = source_node.leftChild;
+	var right_node  = source_node.rightChild;
+	var parent_node = source_node.parent;
+
+	while(source_node !== null)
+	{
+		if(left_node === null && right_node === null)
+		{
+			/// no child nodes (is a leaf node)
+
 			source_node.parent = null;
+
+			if(parent_node === left_node)
+			{
+				parent_node.leftChild = null;
+				parent_node.balanceFactor++;
+			}
+			else
+			{
+				parent_node.rightChild = null;
+				parent_node.balanceFactor--;
+			}
+		}
+		else if( (left_node === null && right_node !== null) || (right_node === null && left_node !== null))
+		{
+			// at least 1 child node
+			parent_node.balanceFactor = 0;
 		}
 		else
 		{
-			if(parent_node.leftChild === source_node)
-				parent_node.leftChild = leaf_node;
-			else
-				parent_node.rightChild = leaf_node;
-			leaf_node.parent = parent_node;
+			// both children nodes exist
 		}
-
 	}
 
 }
@@ -417,6 +466,8 @@ var insertNode = function(source_node, value)
 
 	if(source_node === null)
 	{
+		/// Create initial root node.
+
 		new_node = new Node();
 		new_node.x = canvas_width/2.0;
 		new_node.y = 100.0;
@@ -425,8 +476,17 @@ var insertNode = function(source_node, value)
 	}
 	else
 	{
+		/// Since I am not doing this recursively there is no way to keep track of the old balanceFactor values without
+		/// over-writing them. So since I must traverse the tree anyway I will store the old balance factors
+		/// into an array (oldbf_array) so later when I must traverse the tree upward I have the correct old balance factors to
+		/// compare against.
+		///
+		/// traverse down to correct leaf to attach new node.
+
+		var oldbf_array = [];
 		while(source_node !== null)
 		{
+			oldbf_array.push(source_node.balanceFactor);
 			if(source_node.leftChild !== null && value < source_node.value)
 				source_node = source_node.leftChild;
 			else if(source_node.rightChild !== null && value >= source_node.value)
@@ -439,6 +499,10 @@ var insertNode = function(source_node, value)
 		new_node.value  = value;
 		new_node.parent = source_node;
 
+		/// We can automatically inc/dec the balance factor of new_nodes parent.
+		/// knowing that it would have to add 1 (because added node is now apart of its right tree)
+		/// or subtract 1 (vice-versa).
+
 		if(value < source_node.value)
 		{
 			source_node.leftChild = new_node;
@@ -450,30 +514,53 @@ var insertNode = function(source_node, value)
 			source_node.balanceFactor++;
 		}
 
-		source_node = new_node;
+		/// Need to Move Back Up the tree until tree root is reached and determine the correct
+		/// balance factors
 
-		var oldbf = 0;
+		source_node = new_node.parent; // start node at newly added leafs parent.
+		var oldbf   = 0;               // old balance factor
+
 		while(source_node.parent !== null)
 		{
-			var child = source_node;
+			oldbf = oldbf_array[oldbf_array.length-1];
+			var child   = source_node;
 			source_node = source_node.parent;
-			oldbf = source_node.balanceFactor;
 
 			if(source_node.rightChild === child && child !== null)
 			{
-				if(source_node.rightChild.balanceFactor !== 0)
-					source_node.balanceFactor++;
+				if(source_node.rightChild.balanceFactor !== 0 &&  oldbf !== source_node.rightChild.balanceFactor)
+					source_node.balanceFactor++;					
 			}
 			else if(source_node.leftChild === child && child !== null)
 			{
-				if(source_node.leftChild.balanceFactor !== 0)
+				if(source_node.leftChild.balanceFactor !== 0 && oldbf !== source_node.leftChild.balanceFactor)
 					source_node.balanceFactor--;
 			}
 
+			/// A node is either right heavy or left heavy and must be balanced.
+			/// The balancing doe not account for making sure the parent child is
+			/// connected to the correct rebalanced node so it must be set to it
+			/// unless the node is the parent node.
 
-			if(source_node.balanceFactor < -1 || source_node.balanceFactor > 1)
-				return nodeBalance(source_node);
+			if(source_node.parent !== null && (source_node.balanceFactor < -1 || source_node.balanceFactor > 1))
+			{
+				/// Need to know which link side the parent needs to attach itself
+				/// to the rebalanced node
+
+				if(source_node.parent.leftChild === source_node)
+					source_node.parent.leftChild = nodeBalance(source_node);
+				else
+					source_node.parent.rightChild = nodeBalance(source_node);
+			}
+			else if(source_node.balanceFactor < -1 || source_node.balanceFactor > 1)
+				source_node = nodeBalance(source_node);
+			
+
+			oldbf_array.pop();
 		}
+
+		oldbf_array = []; // empty array of old balance factors
+		return source_node;
 		
 	}
 
@@ -504,6 +591,7 @@ var distance = function(x1, y1, x2, y2)
 	return Math.sqrt( Math.pow(x2-x1,2.0) + Math.pow(y2-y1,2.0) );
 }
 
+var selection_array = [];
 var checkForSelection = function(node, x, y)
 {
 	// recusively looks for selected node by creating a line between the mouse position
@@ -519,8 +607,9 @@ var checkForSelection = function(node, x, y)
 
 		if(d < node_radius)
 		{
-			node.selected = true;
-			selected_node = node;
+			//node.selected = true;
+			//selected_node = node;
+			selection_array.push({n:node, m:d});
 		}
 		else
 			node.selected = false;
@@ -750,6 +839,26 @@ var clicking = function(event)
 {
 	var mousePosition = getCanvasMouseCoordinates(canvas, event);
 	checkForSelection(root, mousePosition.x, mousePosition.y);
+
+	var id = null;
+	if(selection_array.length > 0)
+	{
+		console.log(selection_array.length)
+
+		id = selection_array[0];
+		for(var i=1; i<selection_array.length; i++)
+		{
+			if(id.m <= selection_array[i].m)
+				id = selection_array[i];
+		}
+
+		if(selected_node !== null)
+			selected_node.selected = false;
+		selected_node = id.n;
+		selected_node.selected = true;
+
+		selection_array = [];
+	}
 }
 
 var addnode = function(event)
@@ -785,10 +894,10 @@ var deletenode = function(event)
 {
 	if(selected_node !== null && selected_node.selected === true)
 	{
-		if(selected_node.parent === null)
+		//if(selected_node.parent === null)
 			root = removeNode(selected_node);
-		else
-			removeNode(selected_node);
+		//else
+		//	removeNode(selected_node);
 
 		treecount--;
 	}
@@ -815,9 +924,13 @@ var clearTraversal = function(event)
 
 var clearAll = function(event)
 {
-	root = null;
-	travered_array = [];
-	treecount = 0;
+	var answer = confirm("You sure?");
+	if(answer === true)
+	{
+		root = null;
+		travered_array = [];
+		treecount = 0;
+	}
 }
 
 var MouseDown = null;
